@@ -7,7 +7,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -98,6 +100,41 @@ public class UserService {
 
             userRepository.save(spouse);
             userRepository.save(user);
+        } else {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+    }
+
+    // Método para borrar usuario
+    @Transactional
+    public void deleteUser(Long userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if(optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            // Eliminar relaciones con padres
+            Set<User> padres = new HashSet<>(user.getPadres());
+            for(User parent : padres) {
+                parent.getHijos().remove(user);
+                user.getPadres().remove(parent);
+            }
+
+            // Eliminar relaciones con hijos
+            Set<User> hijos = new HashSet<>(user.getHijos());
+            for(User child : hijos) {
+                child.getPadres().remove(user);
+                user.getHijos().remove(child);
+            }
+
+            // Eliminar relaciones con cónyuges
+            Set<User> conyuges = new HashSet<>(user.getConyuges());
+            for(User spouse : conyuges) {
+                spouse.getConyuges().remove(user);
+                user.getConyuges().remove(spouse);
+            }
+
+            // Finalmente, borrar el usuario
+            userRepository.delete(user);
         } else {
             throw new RuntimeException("Usuario no encontrado");
         }

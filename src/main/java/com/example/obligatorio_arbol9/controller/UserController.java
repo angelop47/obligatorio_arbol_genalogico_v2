@@ -56,4 +56,11 @@ public class UserController {
         User tree = userService.getGenealogyTree(userId);
         return ResponseEntity.ok(tree);
     }
+
+    // Endpoint para borrar usuario
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
+    }
 }
