@@ -1,5 +1,6 @@
 package com.example.obligatorio_arbol9.controller;
 
+import com.example.obligatorio_arbol9.dto.ConfirmationRequest;
 import com.example.obligatorio_arbol9.dto.FamilyMemberRequest;
 import com.example.obligatorio_arbol9.dto.UserDTO;
 import com.example.obligatorio_arbol9.entity.User;
@@ -57,7 +58,16 @@ public class UserController {
         return ResponseEntity.ok(tree);
     }
 
-    // Endpoint para borrar usuario
+    // 6. Confirmar registro de usuario
+    @PostMapping("/{userId}/confirm")
+    public ResponseEntity<?> confirmUser(
+            @PathVariable Long userId,
+            @Valid @RequestBody ConfirmationRequest request) {
+        userService.confirmUser(userId, request);
+        return ResponseEntity.ok("Confirmación realizada exitosamente.");
+    }
+
+    // 7. Borrar usuario
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);

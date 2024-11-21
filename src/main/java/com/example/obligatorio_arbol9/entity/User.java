@@ -15,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true) // Añadir esta línea
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id")
@@ -22,6 +23,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include // Incluir solo el campo 'id'
     private Long id;
 
     private String nombre;
@@ -31,6 +33,20 @@ public class User {
     private LocalDate fechaFallecimiento;
 
     private Integer grado;
+
+    // Estado de confirmación: PENDING, CONFIRMED
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private ConfirmationStatus confirmationStatus = ConfirmationStatus.PENDING;
+
+    // Familias que han confirmado
+    @ManyToMany
+    @JoinTable(
+            name = "user_confirmations",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "confirmed_by_id")
+    )
+    private Set<User> confirmedBy = new HashSet<>();
 
     // Padres
     @ManyToMany
