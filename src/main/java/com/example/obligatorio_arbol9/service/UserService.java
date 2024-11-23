@@ -310,4 +310,17 @@ public class UserService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    //Obtener Usuario por nombre
+    public User getGenealogyTreeByName(String nombre) {
+        List<User> users = userRepository.findAllByNombre(nombre);
+        if (users.isEmpty()) {
+            throw new RuntimeException("Usuario no encontrado");
+        } else if (users.size() > 1) {
+            throw new RuntimeException("Se encontraron múltiples usuarios con ese nombre");
+        } else {
+            return users.get(0);
+        }
+    }
+
 }

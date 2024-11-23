@@ -83,4 +83,11 @@ public class UserController {
         List<UserSummaryDTO> users = userService.getAllUsersSummary();
         return ResponseEntity.ok(users);
     }
+
+    //Obtener árbol genealógico por nombre de usuario
+    @GetMapping("/name/{nombre}/tree")
+    public ResponseEntity<User> getGenealogyTreeByName(@PathVariable String nombre) {
+        User tree = userService.getGenealogyTreeByName(nombre);
+        return ResponseEntity.ok(tree);
+    }
 }
