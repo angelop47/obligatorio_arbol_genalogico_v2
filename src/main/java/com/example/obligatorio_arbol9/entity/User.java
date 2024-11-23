@@ -2,6 +2,8 @@ package com.example.obligatorio_arbol9.entity;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -10,7 +12,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "email")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -85,4 +89,9 @@ public class User {
                 .map(User::getId)
                 .collect(Collectors.toSet());
     }
+
+    @Column(nullable = false, unique = true)
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "El email debe ser válido")
+    private String email;
 }

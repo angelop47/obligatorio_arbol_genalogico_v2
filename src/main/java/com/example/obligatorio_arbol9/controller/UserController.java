@@ -3,12 +3,15 @@ package com.example.obligatorio_arbol9.controller;
 import com.example.obligatorio_arbol9.dto.ConfirmationRequest;
 import com.example.obligatorio_arbol9.dto.FamilyMemberRequest;
 import com.example.obligatorio_arbol9.dto.UserDTO;
+import com.example.obligatorio_arbol9.dto.UserSummaryDTO;
 import com.example.obligatorio_arbol9.entity.User;
 import com.example.obligatorio_arbol9.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -72,5 +75,12 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    //8. Endpoint para obtener todos los usuarios sin relaciones
+    @GetMapping
+    public ResponseEntity<List<UserSummaryDTO>> getAllUsers() {
+        List<UserSummaryDTO> users = userService.getAllUsersSummary();
+        return ResponseEntity.ok(users);
     }
 }
