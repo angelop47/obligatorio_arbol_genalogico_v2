@@ -323,4 +323,25 @@ public class UserService {
         }
     }
 
+    public List<UserSummaryDTO> getSameGenerationFamily(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Integer grado = user.getGrado();
+        List<User> sameGenerationUsers = userRepository.findByGrado(grado)
+                .stream()
+                .sorted((u1, u2) -> u1.getFechaNacimiento().compareTo(u2.getFechaNacimiento())) // Ordena por fecha de nacimiento (mayores primero)
+                .collect(Collectors.toList());
+
+        return sameGenerationUsers.stream()
+                .map(u -> UserSummaryDTO.builder()
+                        .id(u.getId())
+                        .nombre(u.getNombre())
+                        .fechaNacimiento(u.getFechaNacimiento())
+                        .fechaFallecimiento(u.getFechaFallecimiento())
+                        .email(u.getEmail())
+                        .confirmationStatus(u.getConfirmationStatus())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }

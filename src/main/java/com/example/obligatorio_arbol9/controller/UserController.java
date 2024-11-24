@@ -90,4 +90,10 @@ public class UserController {
         User tree = userService.getGenealogyTreeByName(nombre);
         return ResponseEntity.ok(tree);
     }
+
+    @GetMapping("/{userId}/same-generation")
+    public ResponseEntity<List<UserSummaryDTO>> getSameGenerationFamily(@PathVariable Long userId) {
+        List<UserSummaryDTO> family = userService.getSameGenerationFamily(userId);
+        return ResponseEntity.ok(family);
+    }
 }
