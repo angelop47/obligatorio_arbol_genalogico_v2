@@ -1,9 +1,6 @@
 package com.example.obligatorio_arbol9.service;
 
-import com.example.obligatorio_arbol9.dto.ConfirmationRequest;
-import com.example.obligatorio_arbol9.dto.UserDTO;
-import com.example.obligatorio_arbol9.dto.UserSummaryDTO;
-import com.example.obligatorio_arbol9.dto.UserTreeDTO;
+import com.example.obligatorio_arbol9.dto.*;
 import com.example.obligatorio_arbol9.entity.ConfirmationStatus;
 import com.example.obligatorio_arbol9.entity.User;
 import com.example.obligatorio_arbol9.repository.UserRepository;
@@ -385,4 +382,67 @@ public class UserService {
                         .collect(Collectors.toList()))
                 .build();
     }
+
+
+    //obtener lista de confirmaciones pendientes
+    public List<PendingConfirmationDTO> getPendingConfirmations(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // Obtener todos los familiares en el árbol genealógico
+        Set<User> familyTree = new HashSet<>();
+        traverseFamilyTree(user, 10, familyTree); // Asumiendo un límite de 10 grados para evitar ciclos
+
+        // Filtrar aquellos que están pendientes de confirmación
+        List<PendingConfirmationDTO> pendingConfirmations = familyTree.stream()
+                .filter(u -> u.getConfirmationStatus() == ConfirmationStatus.PENDING)
+                .map(u -> PendingConfirmationDTO.builder()
+                        .id(u.getId())
+                        .nombre(u.getNombre())
+                        .fechaNacimiento(u.getFechaNacimiento())
+                        .fechaFallecimiento(u.getFechaFallecimiento())
+                        .email(u.getEmail())
+                        .confirmationStatus(u.getConfirmationStatus())
+                        .accionParaConfirmar(determineAction(u))
+                        .build())
+                .collect(Collectors.toList());
+
+        return pendingConfirmations;
+    }
+
+
+    //Método recursivo para recorrer el árbol genealógico.
+    private void traverseFamilyTree(User user, int depth, Set<User> familyTree) {
+        if (user == null || depth < 0 || familyTree.contains(user)) {
+            return;
+        }
+
+        familyTree.add(user);
+
+        for (User parent : user.getPadres()) {
+            traverseFamilyTree(parent, depth - 1, familyTree);
+        }
+
+        for (User child : user.getHijos()) {
+            traverseFamilyTree(child, depth - 1, familyTree);
+        }
+
+        for (User spouse : user.getConyuges()) {
+            traverseFamilyTree(spouse, depth - 1, familyTree);
+        }
+    }
+
+
+    //Determina la acción sugerida para confirmar un usuario pendiente.
+    private String determineAction(User user) {
+        if (user.getFechaFallecimiento() != null) {
+            return "Solicitar confirmación a al menos 3 familiares directos.";
+        } else if (isAdult(user)) {
+            return "Confirmar tu propio registro.";
+        } else {
+            return "Solicitar confirmación a un progenitor o familiar de hasta segundo grado.";
+        }
+    }
+
+
 }

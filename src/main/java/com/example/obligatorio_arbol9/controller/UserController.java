@@ -103,4 +103,11 @@ public class UserController {
         return ResponseEntity.ok(tree);
     }
 
+    //confirmaciones pendientes
+    @GetMapping("/{userId}/pending-confirmations")
+    public ResponseEntity<List<PendingConfirmationDTO>> getPendingConfirmations(@PathVariable Long userId) {
+        List<PendingConfirmationDTO> pendingConfirmations = userService.getPendingConfirmations(userId);
+        return ResponseEntity.ok(pendingConfirmations);
+    }
+
 }
