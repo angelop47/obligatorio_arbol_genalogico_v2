@@ -3,6 +3,7 @@ package com.example.obligatorio_arbol9.service;
 import com.example.obligatorio_arbol9.dto.ConfirmationRequest;
 import com.example.obligatorio_arbol9.dto.UserDTO;
 import com.example.obligatorio_arbol9.dto.UserSummaryDTO;
+import com.example.obligatorio_arbol9.dto.UserTreeDTO;
 import com.example.obligatorio_arbol9.entity.ConfirmationStatus;
 import com.example.obligatorio_arbol9.entity.User;
 import com.example.obligatorio_arbol9.repository.UserRepository;
@@ -343,5 +344,45 @@ public class UserService {
                         .confirmationStatus(u.getConfirmationStatus())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+
+    //Construye el árbol genealógico del usuario hasta un grado de profundidad específico.
+    public UserTreeDTO getGenealogyTree(Long userId, int depth) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return buildUserTree(user, depth, new HashSet<>());
+    }
+
+
+    //Método recursivo para construir el árbol genealógico.
+    private UserTreeDTO buildUserTree(User user, int depth, Set<Long> visited) {
+        if (user == null || depth < 0 || visited.contains(user.getId())) {
+            return null;
+        }
+
+        visited.add(user.getId());
+
+        return UserTreeDTO.builder()
+                .id(user.getId())
+                .nombre(user.getNombre())
+                .fechaNacimiento(user.getFechaNacimiento())
+                .fechaFallecimiento(user.getFechaFallecimiento())
+                .email(user.getEmail())
+                .confirmationStatus(user.getConfirmationStatus())
+                .padres(user.getPadres().stream()
+                        .map(parent -> buildUserTree(parent, depth - 1, visited))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .hijos(user.getHijos().stream()
+                        .map(child -> buildUserTree(child, depth - 1, visited))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .conyuges(user.getConyuges().stream()
+                        .map(spouse -> buildUserTree(spouse, depth - 1, visited))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .build();
     }
 }

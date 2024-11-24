@@ -1,9 +1,6 @@
 package com.example.obligatorio_arbol9.controller;
 
-import com.example.obligatorio_arbol9.dto.ConfirmationRequest;
-import com.example.obligatorio_arbol9.dto.FamilyMemberRequest;
-import com.example.obligatorio_arbol9.dto.UserDTO;
-import com.example.obligatorio_arbol9.dto.UserSummaryDTO;
+import com.example.obligatorio_arbol9.dto.*;
 import com.example.obligatorio_arbol9.entity.User;
 import com.example.obligatorio_arbol9.service.UserService;
 import jakarta.validation.Valid;
@@ -96,4 +93,14 @@ public class UserController {
         List<UserSummaryDTO> family = userService.getSameGenerationFamily(userId);
         return ResponseEntity.ok(family);
     }
+
+
+    @GetMapping("/{userId}/tree-generation")
+    public ResponseEntity<UserTreeDTO> getGenealogyTree(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int depth) {
+        UserTreeDTO tree = userService.getGenealogyTree(userId, depth);
+        return ResponseEntity.ok(tree);
+    }
+
 }
